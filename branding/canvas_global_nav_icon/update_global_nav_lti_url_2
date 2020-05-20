@@ -1,0 +1,34 @@
+var customObservers = {};
+
+const onBodyDomChange = function(logicFunction) {
+    const bodyNode = document.getElementsByTagName('body')[0];
+    const observer_config = { childList: true, subtree: true };
+    customObservers[logicFunction] = new MutationObserver(logicFunction);
+    customObservers[logicFunction].observe(bodyNode,observer_config);
+};
+
+const fixCatalogURL = function() {
+    //Configure these settings
+    var catalog_url = "https://sgpolitemall.singapore.catalog.canvaslms.com?target_uri=/"
+    var catalog_tool_id = "53"
+    var root_account_id = "1"
+    //End of Config
+    
+    if (ENV['current_user_roles'].indexOf('admin') > -1 || ENV['current_user_roles'].indexOf('teacher') > -1) {
+        // START - Change URL of PD Catalog LTI
+        var catalog_global_nav = document.querySelector('#context_external_tool_'+catalog_tool_id+'_menu_item > a');
+        if (catalog_global_nav!=null){
+            nav_link = catalog_global_nav.href
+            if(nav_link == catalog_url){
+                customObservers[fixCatalogURL].disconnect();
+            };
+            if (nav_link.indexOf('/accounts/'+root_account_id+'/external_tools/'+catalog_tool_id+'?launch_type=global_navigation') > -1) {
+                catalog_global_nav.setAttribute('href', catalog_url);
+                // catalog_global_nav.setAttribute('target', '_blank');
+                // catalog_global_nav.setAttribute('rel', 'noopener noreferrer');
+            };
+        };
+    };
+};
+
+onBodyDomChange(fixCatalogURL);
